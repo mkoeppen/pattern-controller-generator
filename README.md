@@ -11,7 +11,6 @@ npm i pattern-controller-generator --save-dev
 https://www.npmjs.com/package/pattern-controller-generator
 
 # TODO
-- create NPM Package
 - export twigdoc2json into an own repo
 - handle PatternData Objects
 - extend Readme / Documentation
