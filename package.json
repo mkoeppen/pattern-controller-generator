@@ -1,6 +1,6 @@
 {
   "name": "pattern-controller-generator",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Generate pattern controller from twigdoc",
   "main": "index.js",
   "scripts": {

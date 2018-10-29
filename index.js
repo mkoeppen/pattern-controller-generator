@@ -2,7 +2,7 @@
 
 var through = require('through2');
 
-function patternControllerGenerator(obj, options) {
+function patternControllerGenerator(options) {
 
     options = options || {}; 
 
@@ -66,7 +66,7 @@ function patternControllerGenerator(obj, options) {
   
       if(!settingsFullString || settingsFullString.length <= 0) return;
   
-      variableLineStrings = settingsFullString[0].match(findVarLines);
+      variableLineStrings = settingsFullString[0].match(findVarLines) || [];
   
       variableLineStrings.forEach(function(item){
         var variable = item.split(" ").filter(function (el) { return el; });
@@ -122,9 +122,9 @@ function patternControllerGenerator(obj, options) {
       var phpContent = "<?php\n\n\t/* TWIG-File-Basename: " + patternName + " */\n\n\t[__NAMESPACE__]\n\n[__ENUMS__]\n\n[__CLASS__]\n?>",
       classContent = "\tclass [__CLASSNAME__] extends BasePattern {\n[__DECLARATIONS__]\n\n[__CONSTRUCTOR__]\n\n[__FUNCTIONS__]\n\n[__GET_JSON__]\n\t}\n",
       declarations = "",
-      functions = "";
+      functions = "",
       declarationTemplate = "\n\t\t/\*\*\n[__VAR_COMMENT__]\t\t\* \@var [__VAR_TYPE__]\n\t\t\*\/\n\t\tprivate $[__VAR_NAME__] = [__DEFAULT_VALUE__];\n",
-      getterTemplate = "\n\t\t/\*\*\n\t\t\* \@return [__RETURN_TYPE__]\n\t\t\*\/\n\t\tpublic function get[__VAR_NAME_TITLE__]() {\n\t\t\treturn $this->[__VAR_NAME__];\n\t\t}\n";
+      getterTemplate = "\n\t\t/\*\*\n\t\t\* \@return [__RETURN_TYPE__]\n\t\t\*\/\n\t\tpublic function get[__VAR_NAME_TITLE__]() {\n\t\t\treturn $this->[__VAR_NAME__];\n\t\t}\n",
       setterTemplate = "\n\t\t/\*\*\n\t\t* @param [__VAR_TYPE__] $[__VAR_NAME__]\n\t\t\* \@return [__RETURN_TYPE__]\n\t\t\*\/\n\t\tpublic function set[__VAR_NAME_TITLE__]($[__VAR_NAME__]) {\n\t\t\t$this->[__VAR_NAME__] = $[__VAR_NAME__];\n\t\t}\n",
       asJson = "",
       asJsonTemplate = "\n\t\tpublic function asJson():array\n\t\t{\n\t\t\treturn [\n[__ASSIGNMENTS__]\t\t\t];\n\t\t}\n",
