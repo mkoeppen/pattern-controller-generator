@@ -8,5 +8,6 @@ npm install --save-dev git+https://github.com/mkoeppen/pattern-controller-genera
 
 # TODO
 - create NPM Package
-- export twigdoc2json into a own repo
+- export twigdoc2json into an own repo
 - handle PatternData Objects
+- extend Readme / Documentation
