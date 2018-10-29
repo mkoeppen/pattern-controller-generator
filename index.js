@@ -1,7 +1,8 @@
 'use strict';
 
-var through = require('through2');
-
+const through = require('through2'),
+    convertTwigdocToJson = require('convert-twigdoc-to-json');
+    
 function patternControllerGenerator(options) {
 
     options = options || {}; 
@@ -24,100 +25,7 @@ function patternControllerGenerator(options) {
         return stringUpperFirstChar(substring); 
       }).join("");
     }
-  
-    // done
-    function parseEnumSettings(twigContent) {
-  
-  
-      var findCommentRegex = /\{\#\#[\s\S]*?\#\}/m,
-      findEnumLines = /@enum.*/g,
-      settingsFullString = twigContent.match(findCommentRegex),
-      enumLineStrings = [],
-      enumSettings = [];
-  
-      if(!settingsFullString || settingsFullString.length <= 0) return;
-  
-      enumLineStrings = settingsFullString[0].match(findEnumLines);
-  
-      enumLineStrings.forEach(function(item){
-        var enumItems = item.split(" ").filter(function (el) { return el; });
-  
-        enumSettings.push({
-          name: enumItems.length >= 2 ? stringToUpperCamelCase(enumItems[1]) : "",
-          items: enumItems.length >= 2 ? enumItems.slice(2).map(function(enumItem) { 
-            return {
-              name: stringToUpperCamelCase(enumItem),
-              value: enumItem
-            } 
-          }) : []
-        });
-      });
-  
-      return enumSettings;
-    }
-  
-    // done
-    function parseVariableSettings(twigContent) {
-      var findCommentRegex = /\{\#\#[\s\S]*?\#\}/m,
-      findVarLines = /@var.*/g,
-      settingsFullString = twigContent.match(findCommentRegex),
-      variableLineStrings,
-      variableSettings = [];
-  
-      if(!settingsFullString || settingsFullString.length <= 0) return;
-  
-      variableLineStrings = settingsFullString[0].match(findVarLines) || [];
-  
-      variableLineStrings.forEach(function(item){
-        var variable = item.split(" ").filter(function (el) { return el; });
-  
-        variableSettings.push({
-          fullname: variable.length >= 2 ? variable[1] : "",
-          name: variable.length >= 2 ? variable[1].replace(/.*?__/, "") : "",
-          type: variable.length >= 3 ? variable[2] : "",
-          comment: variable.length >= 4 ? variable.slice(4).join(" ") : ""
-        });
-      });
-  
-      return variableSettings;
-    }
-  
-    function asPhpType(type) {
-      switch (type) {
-        case "KeyValueMap":
-          return "array|null";
-        default:
-          return type + "|null";
-      }
-    }
-  
-    // done
-    function parseConstructorSettings(twigContent) {
-      var findCommentRegex = /\{\#\#[\s\S]*?\#\}/m,
-      findVarLines = /@param.*/g,
-      settingsFullString = twigContent.match(findCommentRegex),
-      variableLineStrings = [],
-      variableSettings = [];
-  
-      if(!settingsFullString || settingsFullString.length <= 0) return;
-      
-      variableLineStrings = settingsFullString[0].match(findVarLines);
-  
-      variableLineStrings.forEach(function(item){
-        var variable = item.split(" ").filter(function (el) { return el; });
-  
-        variableSettings.push({
-          fullname: variable.length >= 2 ? variable[1] : "",
-          name: variable.length >= 2 ? variable[1].replace(/.*?__/, "") : "",
-          type: variable.length >= 3 ? variable[2] : "",
-          phpType: variable.length >= 3 ? variable[2] : "",
-          comment: variable.length >= 4 ? variable.slice(4).join(" ") : ""
-        });
-      });
-  
-      return variableSettings;
-    }
-  
+    
     function generatePhp(patternName, patternType, variables, constructorParameter, enumSettings) {
       var phpContent = "<?php\n\n\t/* TWIG-File-Basename: " + patternName + " */\n\n\t[__NAMESPACE__]\n\n[__ENUMS__]\n\n[__CLASS__]\n?>",
       classContent = "\tclass [__CLASSNAME__] extends BasePattern {\n[__DECLARATIONS__]\n\n[__CONSTRUCTOR__]\n\n[__FUNCTIONS__]\n\n[__GET_JSON__]\n\t}\n",
@@ -137,7 +45,7 @@ function patternControllerGenerator(options) {
   
       function generateEnums(enums) {
         
-        return enums.map(function(enumObject) {
+        return (enums || []).map(function(enumObject) {
   
           var enumItems = enumObject.items.map(function(enumItem) {
             return enumItemTemplate
@@ -152,7 +60,7 @@ function patternControllerGenerator(options) {
       }
   
       function generateVariableDeclarationsPhp(variables, declarationTemplate) {
-        return variables.map(function(variable) {
+        return (variables || []).map(function(variable) {
           var name = variable.name;
           
           if(!name) return "";
@@ -164,7 +72,7 @@ function patternControllerGenerator(options) {
       }
   
       function generateFunctionDeclarationsPhp(variables, getterTemplate, setterTemplate) {
-        return variables.map(function(variable) {
+        return (variables || []).map(function(variable) {
           var name = variable.name;
     
           if(!name) return "";
@@ -181,7 +89,7 @@ function patternControllerGenerator(options) {
       }
   
       function generateGetJsonPhp(variables, asJsonTemplate, asJsonAssignmentTemplate) {
-        return asJsonTemplate.replace(/\[__ASSIGNMENTS__\]/g, variables.map(function(variable) {
+        return asJsonTemplate.replace(/\[__ASSIGNMENTS__\]/g, (variables || []).map(function(variable) {
           var name = variable.name;
           if(!name) return "";
           return asJsonAssignmentTemplate.replace(/\[__VAR_NAME__\]/g, name);
@@ -189,7 +97,7 @@ function patternControllerGenerator(options) {
       }
   
       function generateConstructor(variables, constructorParameter) {
-        var parameterSettings = constructorParameter.map(function(parameter) { 
+        var parameterSettings = (constructorParameter || []).map(function(parameter) { 
           var settings = variables.filter(function(v) { 
             return v.name === parameter.name
           })
@@ -242,10 +150,8 @@ function patternControllerGenerator(options) {
     }
   
     function convertTwigToPhp(patternType, patternName, twigContent) {
-      var variables = parseVariableSettings(twigContent) || [],
-          enumSettings = parseEnumSettings(twigContent) || [],
-          constructorParameter = parseConstructorSettings(twigContent) || [],
-          phpControllerContent = generatePhp(patternName, patternType, variables, constructorParameter, enumSettings);
+      var settings = convertTwigdocToJson(twigContent),
+          phpControllerContent = generatePhp(patternName, patternType, settings.variables, settings.constructorParameters, settings.enums);
    
       return phpControllerContent;
     }
@@ -256,7 +162,7 @@ function patternControllerGenerator(options) {
           basename = transformedFile.basename.split("@")[0],
           extname = ".php",
           relativePath = stringToCamelCase([patternType, basename].join("-")) + extname,
-          content = transformedFile.contents.toString();
+          content = (transformedFile.contents || "").toString();
   
       transformedFile.basename = basename;
       transformedFile.contents = new Buffer(convertTwigToPhp(patternType, basename, content));

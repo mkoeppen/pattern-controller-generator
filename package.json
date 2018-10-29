@@ -25,6 +25,11 @@
   },
   "homepage": "https://github.com/mkoeppen/pattern-controller-generator#readme",
   "dependencies": {
+    "convert-twigdoc-to-json": "0.0.1",
     "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-phpcbf": "^0.1.2"
   }
 }
