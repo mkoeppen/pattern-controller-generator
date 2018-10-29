@@ -14,3 +14,5 @@ https://www.npmjs.com/package/pattern-controller-generator
 - export twigdoc2json into an own repo
 - handle PatternData Objects
 - extend Readme / Documentation
+- split generate functions into separate files
+- create Java Controller Generation
