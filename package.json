@@ -1,0 +1,30 @@
+{
+  "name": "pattern-controller-generator",
+  "version": "1.0.0",
+  "description": "Generate pattern controller from twigdoc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkoeppen/pattern-controller-generator.git"
+  },
+  "keywords": [
+    "patternlab",
+    "pattern",
+    "controller",
+    "php",
+    "java",
+    "twigdoc"
+  ],
+  "author": "Markus Köppen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mkoeppen/pattern-controller-generator/issues"
+  },
+  "homepage": "https://github.com/mkoeppen/pattern-controller-generator#readme",
+  "dependencies": {
+    "through2": "^2.0.3"
+  }
+}
